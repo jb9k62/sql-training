@@ -1,0 +1,45 @@
+{
+  "name": "sql-training",
+  "version": "1.0.0",
+  "description": "Comprehensive SQL training environment for senior engineering interviews",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:pg96": "DATABASE=pg96 vitest",
+    "test:pg13": "DATABASE=pg13 vitest",
+    "test:sqlite": "DATABASE=sqlite vitest",
+    "test:all": "npm run test:pg96 && npm run test:pg13 && npm run test:sqlite",
+    "test:exercise": "vitest --run",
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down",
+    "docker:restart": "npm run docker:down && npm run docker:up",
+    "docker:logs": "docker-compose -f docker/docker-compose.yml logs -f",
+    "setup": "npm run docker:up && npm run db:wait && npm run db:init",
+    "db:wait": "node src/scripts/wait-for-db.js",
+    "db:init": "node src/scripts/init-databases.js",
+    "clean": "rm -rf data/*.db node_modules"
+  },
+  "dependencies": {
+    "pg": "^8.13.1",
+    "better-sqlite3": "^11.7.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "sql",
+    "training",
+    "postgresql",
+    "sqlite",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT"
+}

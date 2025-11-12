@@ -1,0 +1,10 @@
+-- Basic SELECT with Filtering Exercise
+--
+-- TODO: Write a query that:
+-- 1. Selects users registered after January 1, 2024
+-- 2. Only from USA or Canada
+-- 3. Returns: name, email, country, created_at columns
+-- 4. Ordered by created_at descending (newest first)
+-- 5. Limited to 10 results
+--
+-- WRITE YOUR QUERY HERE:

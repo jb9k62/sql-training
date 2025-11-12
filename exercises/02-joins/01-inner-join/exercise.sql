@@ -1,0 +1,14 @@
+-- INNER JOIN Exercise
+--
+-- TODO: Write a query that:
+-- 1. Joins users and orders tables
+-- 2. Only includes orders with total > $100
+-- 3. Returns: user name, email, order_id, order_date, and total
+-- 4. Orders by order_date descending
+--
+-- Hints:
+-- - Use INNER JOIN to connect the tables
+-- - Use table aliases (u for users, o for orders)
+-- - Filter with WHERE clause after the JOIN
+--
+-- WRITE YOUR QUERY HERE:
