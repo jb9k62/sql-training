@@ -8,10 +8,8 @@
 -- 5. Filters to only students with more than 2 tests
 --
 -- WRITE YOUR QUERY HERE:
-SELECT
-  student_name,
-  COUNT(*) AS test_count
-FROM test_scores
-GROUP BY student_name
+SELECT ts.student_name, COUNT(*) as test_count
+FROM test_scores ts
+GROUP BY ts.student_name
 HAVING COUNT(*) > 2
 ORDER BY test_count DESC;
