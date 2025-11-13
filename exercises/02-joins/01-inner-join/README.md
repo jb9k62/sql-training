@@ -65,6 +65,21 @@ Bob Smith   | bob@example.com     | 3        | 2024-06-10 | 150.00
 - Using WHERE instead of ON for the join condition
 - Not using table aliases when column names are ambiguous
 
+## PostgreSQL Characteristic - DECIMAL Values
+
+**Important Note for Testing:** When using PostgreSQL, DECIMAL columns (like `total DECIMAL(10,2)`) are returned as **strings** in query results, not as numeric values. For example, a total of 250.00 will be returned as the string `'250.00'` instead of the number `250.00`.
+
+When writing tests or comparing DECIMAL values in JavaScript:
+```javascript
+// ❌ Wrong - comparing string to number will fail
+if (row.total === 250.00) { }
+
+// ✅ Correct - convert string to number first
+if (parseFloat(row.total) === 250.00) { }
+```
+
+This behavior is specific to PostgreSQL. SQLite will return numeric values as numbers.
+
 ## Testing Your Solution
 
 ```bash

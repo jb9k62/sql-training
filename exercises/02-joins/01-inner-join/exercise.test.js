@@ -11,6 +11,9 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// NOTE: PostgreSQL returns DECIMAL columns as strings (e.g., '250.00' instead of 250.00)
+// This is why we use parseFloat() when comparing numeric values in assertions.
+// SQLite returns numbers as numbers, so parseFloat() works for both databases.
 const DATABASES = ['pg13'];
 
 describe.each(DATABASES)('%s: INNER JOIN Exercise', (database) => {
@@ -53,7 +56,7 @@ describe.each(DATABASES)('%s: INNER JOIN Exercise', (database) => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
       expectAllRows(result,
-        row => row.total > 100,
+        row => parseFloat(row.total) > 100,
         'All order totals should be greater than $100'
       );
     });
@@ -68,13 +71,13 @@ describe.each(DATABASES)('%s: INNER JOIN Exercise', (database) => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
       expect(result.rows[0].name).toBe('Alice Brown');
-      expect(result.rows[0].total).toBe(300.00);
+      expect(parseFloat(result.rows[0].total)).toBe(300.00);
     });
 
     it('should include Bob Smith with $200 order', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      const bobOrder = result.rows.find(row => row.name === 'Bob Smith' && row.total === 200.00);
+      const bobOrder = result.rows.find(row => row.name === 'Bob Smith' && parseFloat(row.total) === 200.00);
       expect(bobOrder).toBeDefined();
       expect(bobOrder.email).toBe('bob@example.com');
     });
@@ -82,7 +85,7 @@ describe.each(DATABASES)('%s: INNER JOIN Exercise', (database) => {
     it('should include Edward Jones with $175 order', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      const edwardOrder = result.rows.find(row => row.name === 'Edward Jones' && row.total === 175.00);
+      const edwardOrder = result.rows.find(row => row.name === 'Edward Jones' && parseFloat(row.total) === 175.00);
       expect(edwardOrder).toBeDefined();
       expect(edwardOrder.email).toBe('edward@example.com');
     });
