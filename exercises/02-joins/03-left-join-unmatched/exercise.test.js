@@ -6,16 +6,15 @@ import {
   expectRowCount,
   expectColumns,
   expectOrdered,
-  expectAllRows,
 } from '../../../src/utils/test-helpers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const DATABASES = ['pg13'];
 
-describe.each(DATABASES)('%s: INNER JOIN Basics', (database) => {
+describe.each(DATABASES)('%s: LEFT JOIN with Unmatched Records', (database) => {
   let executor;
-  const schema = 'joins_01';
+  const schema = 'joins_03';
 
   beforeAll(async () => {
     executor = new SqlExecutor(database, schema);
@@ -40,42 +39,61 @@ describe.each(DATABASES)('%s: INNER JOIN Basics', (database) => {
     it('should return correct number of rows', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      expectRowCount(result, 5);
+      // 6 books, some with multiple reviews = 9 total rows
+      expectRowCount(result, 9);
     });
 
     it('should have required columns', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      expectColumns(result, ['name', 'email', 'product', 'order_date']);
+      expectColumns(result, ['title', 'author', 'reviewer_name', 'rating']);
     });
 
-    it('should only include USA customers', async () => {
+    it('should include all books (with or without reviews)', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      expectAllRows(result,
-        row => ['Alice Johnson', 'Carol Davis', 'Emma Brown'].includes(row.name),
-        'All results should be from USA-based customers'
-      );
+      // Get unique book titles
+      const titles = new Set(result.rows.map(row => row.title));
+      expect(titles.size).toBe(6);
+      expect(titles.has('The Great Gatsby')).toBe(true);
+      expect(titles.has('1984')).toBe(true);
+      expect(titles.has('To Kill a Mockingbird')).toBe(true);
+      expect(titles.has('Brave New World')).toBe(true);
+      expect(titles.has('Jane Eyre')).toBe(true);
+      expect(titles.has('Wuthering Heights')).toBe(true);
     });
 
-    it('should be ordered by order_date ascending', async () => {
+    it('should be ordered by title ascending', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      expectOrdered(result, 'order_date', 'asc');
+      expectOrdered(result, 'title', 'asc');
+    });
+
+    it('should include books with no reviews', async () => {
+      const exercisePath = path.join(__dirname, 'exercise.sql');
+      const result = await executor.executeFile(exercisePath);
+      // 'Brave New World' and 'Jane Eyre', 'Wuthering Heights' have no reviews
+      const braveNewWorldRows = result.rows.filter(row => row.title === 'Brave New World');
+      const janeEyreRows = result.rows.filter(row => row.title === 'Jane Eyre');
+      const wutheringHeightsRows = result.rows.filter(row => row.title === 'Wuthering Heights');
+
+      expect(braveNewWorldRows.length).toBe(1);
+      expect(braveNewWorldRows[0].reviewer_name).toBeNull();
+      expect(braveNewWorldRows[0].rating).toBeNull();
+
+      expect(janeEyreRows.length).toBe(1);
+      expect(janeEyreRows[0].reviewer_name).toBeNull();
+
+      expect(wutheringHeightsRows.length).toBe(1);
+      expect(wutheringHeightsRows[0].reviewer_name).toBeNull();
     });
 
     it('should show correct first row', async () => {
       const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
-      expect(result.rows[0].name).toBe('Alice Johnson');
-      expect(result.rows[0].product).toBe('Laptop');
-    });
-
-    it('should show correct last row', async () => {
-      const exercisePath = path.join(__dirname, 'exercise.sql');
-      const result = await executor.executeFile(exercisePath);
-      expect(result.rows[4].name).toBe('Alice Johnson');
-      expect(result.rows[4].product).toBe('Monitor');
+      // First alphabetically is '1984'
+      expect(result.rows[0].title).toBe('1984');
+      expect(result.rows[0].author).toBe('George Orwell');
     });
   });
 
