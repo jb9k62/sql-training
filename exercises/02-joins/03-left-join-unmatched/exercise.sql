@@ -8,11 +8,7 @@
 -- 5. Note: Books without reviews will have NULL values in reviewer columns
 --
 -- WRITE YOUR QUERY HERE:
-SELECT
-  b.title,
-  b.author,
-  r.reviewer_name,
-  r.rating
+SELECT b.title, b.author, r.reviewer_name, r.rating
 FROM books b
-LEFT JOIN reviews r ON b.id = r.book_id
+LEFT JOIN reviews r ON r.book_id = b.id
 ORDER BY b.title ASC;

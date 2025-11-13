@@ -8,12 +8,9 @@
 -- 5. Orders results by order_date ascending (oldest first)
 --
 -- WRITE YOUR QUERY HERE:
-SELECT
-  c.name,
-  c.email,
-  o.product,
-  o.order_date
+SELECT c.name, c.email, o.product, o.order_date
 FROM customers c
-INNER JOIN orders o ON c.id = o.customer_id
+INNER JOIN orders o ON o.customer_id = c.id
 WHERE c.country = 'USA'
+-- optiona ascending order
 ORDER BY o.order_date ASC;
