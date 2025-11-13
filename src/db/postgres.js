@@ -3,7 +3,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const { Pool } = pg;
+const { Pool, types } = pg;
+
+// Override DATE parsing to always use UTC
+// PostgreSQL DATE type OID is 1082
+types.setTypeParser(1082, (val) => {
+  // Return date as string in format YYYY-MM-DD or parse as UTC Date
+  return new Date(val + 'T00:00:00.000Z');
+});
 
 // PostgreSQL 9.6 connection pool
 const pg96Pool = new Pool({
@@ -14,7 +21,8 @@ const pg96Pool = new Pool({
   password: process.env.PG_PASSWORD || 'training123',
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
+  connectionTimeoutMillis: 2000,
+  options: '-c timezone=UTC'
 });
 
 // PostgreSQL 13 connection pool
@@ -26,7 +34,8 @@ const pg13Pool = new Pool({
   password: process.env.PG_PASSWORD || 'training123',
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000
+  connectionTimeoutMillis: 2000,
+  options: '-c timezone=UTC'
 });
 
 // Helper to execute with schema context
@@ -49,6 +58,7 @@ export async function queryPg96(sql, params = [], schema = 'public') {
 export async function queryPg13(sql, params = [], schema = 'public') {
   const client = await pg13Pool.connect();
   try {
+    // TODO: i like this schema logic, i think the explicit setSchemaPath is not needed
     if (schema !== 'public') {
       await client.query(`SET search_path TO ${schema}`);
     }

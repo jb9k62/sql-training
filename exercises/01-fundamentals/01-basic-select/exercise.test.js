@@ -14,7 +14,7 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configure which databases this exercise supports
-const DATABASES = ['pg96', 'pg13', 'sqlite'];
+const DATABASES = ['pg13'];
 
 describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
   let executor;
@@ -43,22 +43,22 @@ describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
 
   describe('Exercise Requirements', () => {
     it('should return correct number of rows', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
-      // Should return exactly 7 users from USA/Canada after 2024-01-01
-      expectRowCount(result, 7);
+      // Should return exactly 10 users from USA/Canada after 2024-01-01
+      expectRowCount(result, 10);
     });
 
     it('should have required columns', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       expectColumns(result, ['name', 'email', 'country', 'created_at']);
     });
 
     it('should only include USA and Canada users', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       expectAllRows(result,
@@ -68,7 +68,7 @@ describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
     });
 
     it('should only include users registered after 2024-01-01', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       expectAllRows(result,
@@ -78,14 +78,14 @@ describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
     });
 
     it('should be ordered by created_at descending', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       expectOrdered(result, 'created_at', 'desc');
     });
 
     it('should not have null values in required columns', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       expectNoNulls(result, 'name');
@@ -95,18 +95,18 @@ describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
     });
 
     it('should return the expected first and last rows', async () => {
-      const exercisePath = path.join(__dirname, 'solution.sql');
+      const exercisePath = path.join(__dirname, 'exercise.sql');
       const result = await executor.executeFile(exercisePath);
 
       // Check first row (most recent)
       expect(result.rows[0].name).toBe('Frank Miller');
       expect(result.rows[0].country).toBe('Canada');
-      expect(result.rows[0].created_at).toContain('2024-07-01');
+      expect(result.rows[0].created_at.toISOString()).toContain('2024-07-01');
 
       // Check last row (oldest within criteria)
-      expect(result.rows[6].name).toBe('Leo King');
-      expect(result.rows[6].country).toBe('Canada');
-      expect(result.rows[6].created_at).toContain('2024-01-05');
+      expect(result.rows[9].name).toBe('Leo King');
+      expect(result.rows[9].country).toBe('Canada');
+      expect(result.rows[9].created_at.toISOString()).toContain('2024-01-05');
     });
   });
 

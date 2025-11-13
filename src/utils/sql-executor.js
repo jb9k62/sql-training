@@ -109,11 +109,19 @@ export class SqlExecutor {
       const results = executeMultiple(sql, this.schema);
       return results;
     } else {
-      // For PostgreSQL, split statements and execute them sequentially
-      const statements = sql
-        .split(/;\s*$/gm)
+      // For PostgreSQL, remove comment-only lines first, then split by semicolon
+      const cleanedSql = sql
+        .split('\n')
+        .filter(line => {
+          const trimmed = line.trim();
+          return trimmed.length > 0 && !trimmed.startsWith('--');
+        })
+        .join('\n');
+
+      const statements = cleanedSql
+        .split(';')
         .map(s => s.trim())
-        .filter(s => s.length > 0 && !s.startsWith('--'));
+        .filter(s => s.length > 0);
 
       const results = [];
       for (const statement of statements) {
@@ -123,8 +131,8 @@ export class SqlExecutor {
         } catch (error) {
           // For schema/table creation, we may not get rows back
           if (error.message.includes('CREATE') ||
-              error.message.includes('DROP') ||
-              error.message.includes('SET')) {
+            error.message.includes('DROP') ||
+            error.message.includes('SET')) {
             results.push({ success: true });
           } else {
             console.error(`Error executing seed statement: ${error.message}`);
