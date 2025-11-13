@@ -36,7 +36,7 @@ describe.each(DATABASES)('%s: Basic SELECT with Filtering', (database) => {
 
   afterAll(async () => {
     // Cleanup schema (PostgreSQL only)
-    if (database.startsWith('pg')) {
+    if (database.startsWith('pg') && process.env.CLEANUP_SCHEMAS_AFTER_TESTS === 'true') {
       await executor.dropSchema(schema);
     }
   });

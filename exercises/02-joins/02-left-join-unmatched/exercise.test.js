@@ -29,10 +29,10 @@ describe.each(DATABASES)('%s: LEFT JOIN with Unmatched Records', (database) => {
   });
 
   afterAll(async () => {
-    // Cleanup is commented out to allow debugging
-    // if (database.startsWith('pg')) {
-    //   await executor.dropSchema(schema);
-    // }
+    // Cleanup schema (PostgreSQL only)
+    if (database.startsWith('pg') && process.env.CLEANUP_SCHEMAS_AFTER_TESTS === 'true') {
+      await executor.dropSchema(schema);
+    }
   });
 
   describe('Exercise Requirements', () => {
